@@ -3,6 +3,10 @@
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("✅ Bot do WhatsApp está rodando!")
 
 VERIFY_TOKEN = "meu_token_secreto"
 

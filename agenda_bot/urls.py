@@ -1,7 +1,9 @@
-# agenda_bot/urls.py
+from django.contrib import admin
 from django.urls import path
-from agendamentos.views import whatsapp_webhook
+from agendamentos.views import home, whatsapp_webhook
 
 urlpatterns = [
-    path("webhook/", whatsapp_webhook),
+    path('', home),  # rota inicial
+    path('admin/', admin.site.urls),
+    path('webhook/', whatsapp_webhook),  # seu webhook para o WhatsApp
 ]
