@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Virtual environment
+env/
+venv/
+ENV/
+*.env
+
+# VS Code
+.vscode/
+
+# Django
+*.sqlite3
+db.sqlite3
+*.log
+staticfiles/
+media/
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# Credenciais e tokens
+credentials.json
+token.json
+
+# Secrets
+*.pem
+*.key
+*.crt
+
+# Cache e arquivos temporários
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
+
+# OS files
+ehthumbs.db
+Icon?
+.DS_Store
+
+# Node (se estiver usando frontend)
+node_modules/
+
+# IDEs
+.idea/
