@@ -1,0 +1,318 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Atendimento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ece5dd;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Conteúdo principal (sem incluir footer) */
+    .content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 25%;
+      background-color: #fff;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      text-align: center;
+      position: relative;
+    }
+
+    .add-contact-btn {
+      background-color: #25d366;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .add-contact-btn:hover {
+      background-color: #20b558;
+    }
+
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .contact {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .contact:hover {
+      background-color: #f5f5f5;
+    }
+
+    .contact.active {
+      background-color: #dcf8c6;
+    }
+
+    /* Chat container */
+    .main-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      border-left: 1px solid #004c42;
+    }
+
+    .chat-container {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background-color: #ece5dd;
+    }
+
+    .mensagem {
+      max-width: 60%;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin: 5px 0;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .entrada {
+      background-color: #fff;
+      align-self: flex-start;
+      border: 1px solid #ddd;
+    }
+
+    .saida {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    .hora {
+      font-size: 11px;
+      color: gray;
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    /* Caixa de resposta fixa */
+    .resposta-form {
+      display: flex;
+      padding: 10px;
+      background: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+
+    .resposta-form input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .resposta-form button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background-color: #075E54;
+      color: white;
+      cursor: pointer;
+    }
+
+    .resposta-form button:hover {
+      background-color: #0b7a66;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .modal-content button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .btn-cancelar {
+      background: #ccc;
+    }
+
+    .btn-salvar {
+      background: #075E54;
+      color: white;
+    }
+
+    /* Rodapé */
+    footer {
+      background-color: #075E54;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Conteúdo -->
+  <div class="content">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        Conversas
+        <button class="add-contact-btn" onclick="abrirModal()">+</button>
+      </div>
+      <div class="contact-list">
+        {% for numero in numeros %}
+          <a href="{% url 'painel_chat_numero' numero=numero %}" style="text-decoration:none; color:inherit;">
+              <div class="contact {% if numero == numero_atual %}active{% endif %}">
+                  {{ numero }}
+              </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="main-chat">
+      <div class="chat-header">
+        {% if numero_atual %}
+          Conversando com: {{ numero_atual }}
+        {% else %}
+          Selecione uma conversa
+        {% endif %}
+      </div>
+
+      <div class="chat-container">
+        {% if mensagens %}
+          {% for m in mensagens %}
+            <div class="mensagem {% if m.recebida %}entrada{% else %}saida{% endif %}">
+              <div>
+                <strong>
+                  {% if m.recebida %}
+                    {{ numero_atual }}
+                  {% else %}
+                    Eu
+                  {% endif %}
+                </strong>: {{ m.texto }}
+              </div>
+              <div class="hora">{{ m.data_hora|date:"d/m H:i" }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p style="color: gray; text-align:center; margin-top:20px;">Nenhuma mensagem nesta conversa</p>
+        {% endif %}
+      </div>
+
+      {% if numero_atual %}
+        <!-- Caixa de envio -->
+        <form method="post" action="{% url 'responder_mensagem' numero=numero_atual %}" class="resposta-form">
+          {% csrf_token %}
+          <input type="text" name="mensagem" placeholder="Digite uma mensagem...">
+          <button type="submit">Enviar</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Rodapé -->
+  <footer>
+    © 2025 - 51.755.082 RENATO MARQUES MENDES<br>
+    CNPJ: 51.755.082/0001-15
+    <br>Endereço: RUA MANOEL HERCULANO MARQUES DE FONTES</br>
+    Contato: 19 98104-2273<br>
+    Política de Privacidade: https://zpro.passaportezdg.com.br/diretrizes-e-politicas/aviso-de-privacidade<br>
+    Termos de uso: https://zpro.passaportezdg.com.br/diretrizes-e-politicas/termos-e-condicoes-de-uso 
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal" id="modalContato">
+    <div class="modal-content">
+      <h3>Adicionar Contato</h3>
+      <form method="post" action="{% url 'adicionar_contato' %}">
+        {% csrf_token %}
+        <input type="text" name="numero" placeholder="Número com DDD (ex: 5511999999999)" required>
+        <div>
+          <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-salvar">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal() {
+      document.getElementById('modalContato').style.display = 'flex';
+    }
+    function fecharModal() {
+      document.getElementById('modalContato').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+<!-- templates/clientes/listar.html -->
+<h2>Clientes</h2>
+<a href="{% url 'novo_cliente' %}">Novo Cliente</a>
+<ul>
+  {% for cliente in clientes %}
+    <li>{{ cliente.nome }} - {{ cliente.phone_number_id }}</li>
+  {% empty %}
+    <li>Nenhum cliente cadastrado.</li>
+  {% endfor %}
+</ul>

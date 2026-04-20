@@ -1,0 +1,9 @@
+<!-- templates/clientes/novo.html -->
+<h2>Adicionar Cliente</h2>
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Salvar</button>
+</form>
+
+<a href="{% url 'listar_clientes' %}">Voltar</a>
