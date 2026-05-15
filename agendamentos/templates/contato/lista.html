@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}Contatos{% endblock %}
+
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Contatos</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #ece5dd;
+}
+
+/* HEADER */
+header {
+    background-color: #075E54;
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.btn-voltar {
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+/* BOTÃO ADICIONAR */
+.add-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 20px;
+    background-color: #25d366;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #20b558;
+}
+
+/* LISTA */
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* CARD CONTATO */
+.contato {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.contato:hover {
+    transform: scale(1.01);
+}
+
+/* INFO */
+.info {
+    display: flex;
+    flex-direction: column;
+}
+
+.nome {
+    font-weight: bold;
+    font-size: 16px;
+    color: #111;
+}
+
+.numero {
+    font-size: 13px;
+    color: gray;
+}
+
+/* AÇÕES */
+.acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-acao {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+.btn-acao:hover {
+    transform: scale(1.2);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <a href="{% url 'tela_inicial' %}" class="btn-voltar">⬅</a>
+    <h2>Contatos</h2>
+    <div></div>
+</header>
+
+<div class="container">
+
+    <a href="{% url 'tela_adicionar_contato' %}" class="add-btn">
+        + Adicionar contato
+    </a>
+
+    <div class="lista">
+        {% for c in contatos %}
+        <div class="contato">
+
+            <div class="info">
+                <div class="nome">{{ c.nome|default:"Sem nome" }}</div>
+                <div class="numero">{{ c.numero }}</div>
+            </div>
+
+            <div class="acoes">
+                <a href="{% url 'editar_contato' c.id %}" class="btn-acao">✏️</a>
+
+                <button class="btn-acao" onclick="deletarContato('{{ c.numero }}')">
+                    🗑️
+                </button>
+            </div>
+
+        </div>
+        {% empty %}
+        <p style="text-align:center; color:gray;">Nenhum contato cadastrado</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+function getCSRFToken() {
+    const cookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='));
+
+    return cookie ? cookie.split('=')[1] : '';
+}
+
+function deletarContato(numero) {
+    if (!confirm("Deseja apagar este contato e todas as mensagens?")) return;
+
+    fetch(`/contatos/deletar/${numero}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert("Erro ao deletar");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
+
+{% endblock %}

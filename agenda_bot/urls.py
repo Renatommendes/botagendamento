@@ -1,9 +1,7 @@
 from django.contrib import admin
-from django.urls import path
-from agendamentos.views import home, whatsapp_webhook
+from django.urls import path, include  # inclua o include
 
 urlpatterns = [
-    path('', home),  # rota inicial
     path('admin/', admin.site.urls),
-    path('webhook/', whatsapp_webhook),  # seu webhook para o WhatsApp
+    path('', include('agendamentos.urls')),         # rota raiz do chat
 ]

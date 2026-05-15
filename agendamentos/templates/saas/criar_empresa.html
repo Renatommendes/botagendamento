@@ -1,0 +1,17 @@
+<h2>➕ Criar Empresa</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <input name="nome" placeholder="Nome da empresa"><br><br>
+
+    <input name="verify_token" placeholder="Verify Token"><br><br>
+
+    <input name="whatsapp_access_token" placeholder="Access Token"><br><br>
+
+    <input name="whatsapp_phone_number_id" placeholder="Phone Number ID"><br><br>
+
+    <input name="google_calendar_id" placeholder="Google Calendar ID"><br><br>
+
+    <button type="submit">Criar Empresa</button>
+</form>

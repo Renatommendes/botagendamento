@@ -1,0 +1,29 @@
+<h2>👤 Usuários do Sistema</h2>
+
+<a href="{% url 'criar_usuario_empresa' %}" style="
+    display:inline-block;
+    padding:10px 15px;
+    background:#28a745;
+    color:white;
+    text-decoration:none;
+    border-radius:5px;
+    margin-bottom:15px;
+">
+    ➕ Adicionar Usuário
+</a>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Usuário</th>
+        <th>Empresa</th>
+        <th>Função</th>
+    </tr>
+
+    {% for u in usuarios %}
+    <tr>
+        <td>{{ u.user.username }}</td>
+        <td>{{ u.empresa.nome }}</td>
+        <td>{{ u.funcao }}</td>
+    </tr>
+    {% endfor %}
+</table>

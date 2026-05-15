@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Início{% endblock %}
+
+{% block content %}
+
+<style>
+
+
+header {
+
+    background-color: #075E54;
+    color: white;
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: visible;
+}
+
+.container {
+    flex: 1;
+    padding: 0px;
+}
+
+/* CONTAINER PRINCIPAL */
+.home-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 180px);
+    padding: 20px;
+}
+
+/* CARD CENTRAL */
+.home-card {
+    background: white;
+    width: 100%;
+    max-width: 750px;
+    border-radius: 20px;
+    padding: 50px 40px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* LOGO */
+.home-logo img {
+    width: 180px;
+    max-width: 100%;
+    margin-bottom: 25px;
+}
+
+/* TÍTULO */
+.home-card h1 {
+    color: #075E54;
+    font-size: 36px;
+    margin-bottom: 15px;
+}
+
+/* TEXTO */
+.home-card p {
+    color: #555;
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+/* BOTÕES */
+.home-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.home-btn {
+    background-color: #25d366;
+    color: white;
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.2s;
+    min-width: 220px;
+}
+
+.home-btn:hover {
+    background-color: #20b558;
+    transform: translateY(-2px);
+}
+
+/* RESPONSIVO */
+@media (max-width: 700px) {
+
+    .home-card {
+        padding: 35px 25px;
+    }
+
+    .home-card h1 {
+        font-size: 28px;
+    }
+
+    .home-card p {
+        font-size: 16px;
+    }
+
+    .home-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="home-container">
+
+    <div class="home-card">
+
+        <div class="home-logo">
+            <img src="{% static 'img/logo.png' %}" alt="Logo">
+        </div>
+
+        <h1>Bem-vindo ao Postme</h1>
+
+        <p>
+            Gerencie conversas, contatos e atendimentos
+            em uma plataforma simples, rápida e organizada.
+        </p>
+
+        <div class="home-buttons">
+
+            <a href="{% url 'painel' %}" class="home-btn">
+                💬 Abrir Conversas
+            </a>
+
+            <a href="{% url 'contatos_lista' %}" class="home-btn">
+                📇 Gerenciar Contatos
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

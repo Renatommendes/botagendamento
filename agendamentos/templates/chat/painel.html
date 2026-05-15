@@ -1,0 +1,1023 @@
+
+
+
+
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Atendimento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ece5dd;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Conteúdo principal (sem incluir footer) */
+    .content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 25%;
+      background-color: #fff;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #075E54;
+    color: white;
+    padding: 11.5px;
+    }
+
+    .sidebar-header .titulo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    }
+
+    .add-contact-btn {
+    background-color: #25d366;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    }
+
+    .add-contact-btn:hover {
+      background-color: #20b558;
+    }
+
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .contact {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .contact:hover {
+      background-color: #f5f5f5;
+    }
+
+    .contact.active {
+      background-color: #dcf8c6;
+    }
+
+    /* Chat container */
+    .main-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      border-left: 1px solid #004c42;
+    }
+
+   .chat-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #ece5dd;
+
+    height: calc(100vh - 180px);
+
+    scroll-behavior: smooth;
+    }
+
+    .mensagem {
+      max-width: 60%;
+      padding: 10px 15px;
+      border-radius: 10px;
+      margin: 5px 0;
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .entrada {
+      background-color: #fff;
+      align-self: flex-start;
+      border: 1px solid #ddd;
+    }
+
+    .saida {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+    }
+
+    .hora {
+      font-size: 11px;
+      color: gray;
+      margin-top: 3px;
+      text-align: right;
+    }
+
+    /* Caixa de resposta fixa */
+    .resposta-form {
+      display: flex;
+      padding: 10px;
+      background: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+
+    .resposta-form input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    .resposta-form button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background-color: #075E54;
+      color: white;
+      cursor: pointer;
+    }
+
+    .resposta-form button:hover {
+      background-color: #0b7a66;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .modal-content button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .btn-cancelar {
+      background: #ccc;
+    }
+
+    .btn-salvar {
+      background: #075E54;
+      color: white;
+    }
+
+    .contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    }
+
+    .nome {
+    font-size: 14px;
+    }
+
+    .badge {
+    background: #25D366;
+    color: white;
+    border-radius: 50%;
+    padding: 5px 8px;
+    font-size: 12px;
+    min-width: 20px;
+    text-align: center;
+    }
+
+    /* Rodapé */
+    footer {
+      background-color: #075E54;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .resposta-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+    .btn-anexo {
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    #removerArquivo {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    }
+
+    .btn-voltar {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+    }
+
+    .btn-voltar:hover {
+        background-color: #0a7a6d;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Conteúdo -->
+  <div class="content">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <a href="{% url 'tela_inicial' %}" class="btn-voltar">⬅</a>
+
+        <span class="titulo">Conversas</span>
+
+        <button class="add-contact-btn" onclick="abrirModal()">+</button>
+    </div>
+      <div class="contact-list">
+  {% for contato in contatos %}
+
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+
+      <!-- 🔥 LINK DO CONTATO (NÃO MEXI) -->
+      <a href="{% url 'painel_chat_numero' numero=contato.numero %}" style="text-decoration:none; color:inherit; flex:1;">
+
+        <div class="contact {% if contato.numero == numero_atual %}active{% endif %}" id="contato-{{ contato.numero }}">
+
+          <span class="nome">
+            {{ contato.nome|default:contato.numero }}
+          </span>
+
+          <!-- 🔥 BADGE (mantido) -->
+          {% if contato.nao_lidas > 0 %}
+            <span class="badge">{{ contato.nao_lidas }}</span>
+          {% endif %}
+
+        </div>
+
+      </a>
+
+      <!-- 🔥 BOTÃO 3 PONTINHOS -->
+      <div style="position:relative; margin-right:10px;">
+        <button onclick="toggleMenu('{{ contato.numero }}')"
+                style="background:none; border:none; font-size:18px; cursor:pointer;">
+          ⋮
+        </button>
+
+        <!-- 🔥 MENU -->
+        <div id="menu-{{ contato.numero }}"
+             style="display:none; position:absolute; right:0; top:25px; background:white; border:1px solid #ddd; padding:10px; border-radius:8px; width:180px; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:100;">
+
+          <p><strong>Nome:</strong> {{ contato.nome|default:"Não informado" }}</p>
+          <p><strong>Número:</strong> {{ contato.numero }}</p>
+
+        </div>
+      </div>
+
+    </div>
+
+  {% endfor %}
+</div>
+    </div>
+
+    <!-- Chat -->
+    <div class="main-chat">
+      <div class="chat-header" style="display:flex; justify-content:space-between; align-items:center;">
+
+  <div>
+    {% if numero_atual %}
+      <div>Conversando com: {{ contato.nome|default:numero_atual }}</div>
+
+      <!-- 🔥 STATUS -->
+      <div id="status" style="font-size:12px; color:gray;">
+          {% for contato in contatos %}
+            {% if contato.numero == numero_atual %}
+
+              {% if contato.digitando %}
+                ✍️ digitando...
+              {% elif contato.online %}
+                🟢 Online
+              {% else %}
+                ⚪ Offline
+              {% endif %}
+
+            {% endif %}
+          {% endfor %}
+        </div>
+
+    {% else %}
+      Selecione uma conversa
+    {% endif %}
+  </div>
+
+  {% if numero_atual %}
+    <button onclick="limparMensagens('{{ numero_atual }}')"
+        style="background:orange; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">
+  🧹 Limpar Conversa
+    </button>
+  {% endif %}
+
+</div>
+
+      <div class="chat-container">
+      {% if mensagens %}
+        {% for m in mensagens %}
+            <div class="mensagem {% if m.recebida %}entrada{% else %}saida{% endif %}" data-id="{{ m.id }}">
+
+            <div>
+              <strong>
+                {% if m.recebida %}
+                  {{ contato.nome|default:numero_atual }}
+                {% else %}
+                  Eu
+                {% endif %}
+              </strong>: {{ m.texto }}
+
+              <!-- 🔥 AQUI ENTRA A MÍDIA -->
+              {% if m.tipo == "image" and m.arquivo %}
+                <br>
+                <img src="{{ m.arquivo.url }}" width="200">
+              {% elif m.tipo == "video" and m.arquivo %}
+                <br>
+                <video controls width="200" tabindex="-1">
+                    <source src="{{ m.arquivo.url }}">
+                  </video>
+
+                {% elif m.tipo == "audio" and m.arquivo %}
+                  <br>
+                  <audio controls>
+                    <source src="{{ m.arquivo.url }}">
+                  </audio>
+
+
+
+              {% elif m.tipo == "document" and m.arquivo %}
+                <br>
+                <a href="{{ m.arquivo.url }}" target="_blank">📄 Baixar documento</a>
+              {% endif %}
+
+            </div>
+
+            <div class="hora">
+                  {{ m.data_hora|date:"d/m H:i" }}
+
+                  {% if not m.recebida %}
+                    {% if m.status == "sent" %}
+                      ✔
+                    {% elif m.status == "delivered" %}
+                      ✔✔
+                    {% elif m.status == "read" %}
+                      <span style="color:#4fc3f7;">✔✔</span>
+                    {% endif %}
+                  {% endif %}
+                </div>
+
+          </div>
+        {% endfor %}
+      {% else %}
+    <p style="color: gray; text-align:center; margin-top:20px;">
+      Nenhuma mensagem nesta conversa
+    </p>
+  {% endif %}
+</div>
+
+  {% if numero_atual %}
+<form method="POST"
+      action="{% url 'responder_mensagem' numero=numero_atual %}"
+      class="resposta-form"
+      id="formMensagem"
+      enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    <!-- 🔥 BOTÃO DE ANEXO -->
+    <label for="arquivo" class="btn-anexo">📎</label>
+    <input type="file" id="arquivo" name="arquivo"
+       accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+       style="display: none;">
+    <button type="button" id="btnAudio">🎤</button>
+    <div id="audioAcoes" style="display:none;">
+        <button type="button" id="btnEnviar">📤</button>
+        <button type="button" id="btnCancelar">❌</button>
+    </div>
+    <div id="audioPreview" style="display:none; margin-top:5px;">
+    <audio id="playerAudio" controls></audio>
+    </div>
+    <span id="nomeArquivo" style="font-size:12px;"></span>
+    <button type="button" id="removerArquivo" style="display:none;">❌</button>
+
+    <!-- 🔥 INPUT TEXTO -->
+    <input type="text" id="mensagem" name="mensagem" placeholder="Digite uma mensagem...">
+
+    <button type="submit">Enviar</button>
+
+
+</form>
+{% endif %}
+
+  <!-- Rodapé -->
+  <footer>
+    © 2025 - Postme<br>
+    51.755.082 RENATO MARQUES MENDES<br>
+    CNPJ: 51.755.082/0001-15
+    <br>Endereço: RUA MANOEL HERCULANO MARQUES DE FONTES</br>
+    Contato: 19 98104-2273 / renatomendes1989@gmail.com / postmeentregas@gmail.com<br>
+    Política de Privacidade: https://zpro.passaportezdg.com.br/diretrizes-e-politicas/aviso-de-privacidade<br>
+    Termos de uso: https://zpro.passaportezdg.com.br/diretrizes-e-politicas/termos-e-condicoes-de-uso
+  </footer>
+
+  <!-- Modal -->
+<div class="modal" id="modalContato">
+  <div class="modal-content">
+    <h3>Adicionar Contato</h3>
+
+    <form method="post" action="{% url 'adicionar_contato' %}">
+      {% csrf_token %}
+
+      <!-- 🔥 NOVO CAMPO NOME -->
+      <input
+        type="text"
+        name="nome"
+        placeholder="Nome do contato"
+      >
+
+      <!-- 🔥 NÚMERO (já existia) -->
+      <input
+        type="text"
+        name="numero"
+        placeholder="Número com DDD (ex: 5511999999999)"
+        required
+      >
+
+      <div style="margin-top:10px;">
+        <button
+          type="button"
+          class="btn-cancelar"
+          onclick="fecharModal()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="btn-salvar"
+        >
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+
+function getCSRFToken() {
+  const cookie = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('csrftoken='));
+
+  return cookie ? cookie.split('=')[1] : '';
+}
+
+
+let bloqueioAtualizacao = false;
+let videoEmExecucao = false;
+let audioEmExecucao = false;
+const numeroAtual = "{{ numero_atual }}";
+let typingTimeout;
+
+
+
+
+// =========================
+// 🔥 DIGITANDO
+// =========================
+function avisarDigitando() {
+    if (!numeroAtual) return;
+
+    fetch(`/typing/${numeroAtual}/on/`);
+
+    clearTimeout(typingTimeout);
+
+    typingTimeout = setTimeout(() => {
+        fetch(`/typing/${numeroAtual}/off/`);
+    }, 3000);
+}
+
+// =========================
+// 🔥 INPUT
+// =========================
+const input = document.getElementById("mensagem");
+
+if (input) {
+    input.addEventListener("input", avisarDigitando);
+}
+
+// =========================
+// 🔥 PING ONLINE
+// =========================
+if (numeroAtual) {
+    setInterval(() => {
+        fetch(`/ping/${numeroAtual}/`);
+    }, 10000);
+}
+
+
+
+
+/* 🔥 DETECTA ÁUDIOS */
+document.addEventListener('play', function(e) {
+
+    if (e.target.tagName === 'AUDIO') {
+        audioEmExecucao = true;
+    }
+
+    if (e.target.tagName === 'VIDEO') {
+        videoEmExecucao = true;
+    }
+
+}, true);
+
+document.addEventListener('pause', function(e) {
+
+    if (e.target.tagName === 'AUDIO') {
+        audioEmExecucao = false;
+    }
+
+    if (e.target.tagName === 'VIDEO') {
+        videoEmExecucao = false;
+    }
+
+}, true);
+
+/* 🔥 ATUALIZA CHAT */
+function atualizarChat() {
+
+    /* 🔥 NÃO ATUALIZA DURANTE ÁUDIO/VÍDEO */
+    if (
+        videoEmExecucao ||
+        audioEmExecucao ||
+        bloqueioAtualizacao
+    ) return;
+
+    const chat = document.querySelector('.chat-container');
+
+    if (!chat) return;
+
+    // 🔥 salva posição do scroll
+    const estavaNoFinal =
+        chat.scrollTop + chat.clientHeight >=
+        chat.scrollHeight - 50;
+
+    fetch(window.location.href)
+        .then(res => res.text())
+        .then(html => {
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const novasMensagens =
+                doc.querySelectorAll('.chat-container .mensagem');
+
+            let adicionou = false;
+
+            novasMensagens.forEach(msg => {
+
+                const id = msg.getAttribute("data-id");
+
+                const mensagemExistente =
+                    chat.querySelector(`[data-id="${id}"]`);
+
+                // 🔥 se NÃO EXISTE → adiciona
+                if (!mensagemExistente) {
+
+                    chat.appendChild(msg);
+                    adicionou = true;
+
+                }
+
+                // 🔥 se EXISTE → atualiza status/hora/checks
+                else {
+
+                    mensagemExistente.innerHTML = msg.innerHTML;
+
+                }
+
+            });
+
+            // 🔥 scroll automático só se usuário estava no final
+            if (adicionou && estavaNoFinal) {
+                scrollChatFinal();
+            }
+
+        });
+
+}
+
+
+
+// =========================
+// 🔥 ATUALIZA CONTATOS (mais lento)
+// =========================
+function atualizarContatos() {
+    fetch(window.location.href)
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const novaLista = doc.querySelector('.contact-list');
+
+            if (novaLista) {
+                document.querySelector('.contact-list').innerHTML = novaLista.innerHTML;
+            }
+        });
+}
+
+// =========================
+// 🔥 INTERVALOS
+// =========================
+
+// chat (mensagens) → rápido
+setInterval(() => {
+    if (!bloqueioAtualizacao) {
+        atualizarChat();
+    }
+}, 3000);
+
+// contatos (badge) → mais lento
+setInterval(atualizarContatos, 7000);
+
+
+function abrirModal() {
+  document.getElementById('modalContato').style.display = 'flex';
+}
+
+function fecharModal() {
+  document.getElementById('modalContato').style.display = 'none';
+}
+
+
+function limparMensagens(numero) {
+    if (!confirm("Deseja apagar todas as mensagens desta conversa?")) {
+        return;
+    }
+
+    fetch(`/limpar-mensagens/${numero}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCSRFToken()
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // 🔥 limpa a tela sem reload completo
+            document.querySelector('.chat-container').innerHTML = "";
+        } else {
+            alert("Erro ao apagar mensagens");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro na requisição");
+    });
+}
+
+function toggleMenu(numero) {
+    const menu = document.getElementById(`menu-${numero}`);
+
+    // fecha todos os outros
+    document.querySelectorAll('[id^="menu-"]').forEach(m => {
+        if (m !== menu) m.style.display = 'none';
+    });
+
+    // alterna
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+// fecha ao clicar fora
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('[onclick^="toggleMenu"]') && !event.target.closest('[id^="menu-"]')) {
+        document.querySelectorAll('[id^="menu-"]').forEach(m => {
+            m.style.display = 'none';
+        });
+    }
+});
+
+
+document.addEventListener("play", function(e) {
+    if (e.target.tagName === "VIDEO") {
+        videoEmExecucao = true;
+    }
+}, true);
+
+document.addEventListener("pause", function(e) {
+    if (e.target.tagName === "VIDEO") {
+        videoEmExecucao = false;
+    }
+}, true);
+
+
+document.addEventListener("loadeddata", function(e) {
+    if (e.target.tagName === "VIDEO") {
+        const chat = document.querySelector('.chat-container');
+
+        if (chat && isAtBottom(chat)) {
+            chat.scrollTop = chat.scrollHeight;
+        }
+    }
+}, true);
+
+
+
+
+function isAtBottom(chat) {
+    return chat.scrollHeight - chat.scrollTop <= chat.clientHeight + 50;
+}
+
+
+window.addEventListener("load", function() {
+    const form = document.getElementById("formMensagem");
+    const inputMsg = document.getElementById("mensagem");
+    const inputFile = document.getElementById("arquivo");
+
+    if (!form || !inputMsg) return;
+
+    // 🔥 EVITA DUPLICAR EVENTO
+    if (!form.dataset.listenerAdded) {
+        form.dataset.listenerAdded = "true";
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            console.log("ENVIO DISPARADO");
+
+            // 🔥 BLOQUEIA DUPLICAÇÃO REAL
+            if (form.enviando) {
+                console.log("🚫 DUPLICADO BLOQUEADO");
+                return;
+            }
+
+            form.enviando = true;
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(() => {
+                    inputMsg.value = "";
+
+                    if (inputFile) inputFile.value = "";
+
+                    inputMsg.focus();
+
+                    // 🔥 BLOQUEIA atualização automática
+                    bloqueioAtualizacao = true;
+
+                    atualizarChat();
+
+                    // 🔥 libera depois
+                    setTimeout(() => {
+                        bloqueioAtualizacao = false;
+                    }, 1500);
+                })
+            .catch(err => console.error("Erro:", err))
+            .finally(() => {
+                form.enviando = false;
+            });
+        });
+    }
+
+    // 🔥 ENTER FUNCIONANDO NORMAL
+    inputMsg.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            form.requestSubmit();
+        }
+    });
+});
+
+const inputFile = document.getElementById("arquivo");
+const nomeArquivo = document.getElementById("nomeArquivo");
+const btnRemover = document.getElementById("removerArquivo");
+
+if (inputFile && nomeArquivo && btnRemover) {
+
+    // 🔥 quando seleciona arquivo
+    inputFile.addEventListener("change", function() {
+        if (inputFile.files.length > 0) {
+            nomeArquivo.textContent = inputFile.files[0].name;
+            btnRemover.style.display = "inline";
+        } else {
+            nomeArquivo.textContent = "";
+            btnRemover.style.display = "none";
+        }
+    });
+
+    // 🔥 remover arquivo
+    btnRemover.addEventListener("click", function() {
+        inputFile.value = ""; // limpa
+        nomeArquivo.textContent = "";
+        btnRemover.style.display = "none";
+    });
+}
+
+
+let mediaRecorder;
+let audioChunks = [];
+let gravando = false;
+let audioBlob = null;
+
+const btnAudio = document.getElementById("btnAudio");
+const btnEnviar = document.getElementById("btnEnviar");
+const btnCancelar = document.getElementById("btnCancelar");
+const audioAcoes = document.getElementById("audioAcoes");
+
+btnAudio.addEventListener("click", async () => {
+
+    // 🔴 COMEÇAR GRAVAÇÃO
+    if (!gravando) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) {
+                audioChunks.push(e.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+        // 🔥 cria URL do áudio
+        const audioURL = URL.createObjectURL(audioBlob);
+
+        // 🔥 coloca no player
+        const player = document.getElementById("playerAudio");
+        player.src = audioURL;
+
+        // 🔥 mostra preview
+        document.getElementById("audioPreview").style.display = "block";
+
+        audioAcoes.style.display = "flex";
+    };
+
+        mediaRecorder.start();
+        gravando = true;
+
+        btnAudio.innerText = "⏹️"; // muda pra parar
+    }
+
+    // ⏹️ PARAR GRAVAÇÃO
+    else {
+        mediaRecorder.stop();
+        gravando = false;
+
+        btnAudio.innerText = "🎤";
+    }
+});
+
+
+// 📤 ENVIAR
+btnEnviar.addEventListener("click", () => {
+    if (!audioBlob) return;
+
+    // 🔥 cria arquivo do áudio
+    const file = new File([audioBlob], "audio.webm", {
+        type: "audio/webm"
+    });
+
+    // 🔥 pega input file do seu form
+    const inputFile = document.querySelector('input[name="arquivo"]');
+
+    // 🔥 injeta o arquivo no input
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    inputFile.files = dt.files;
+
+    // 🔥 envia usando seu form padrão (igual texto/imagem)
+    document.getElementById("formMensagem").requestSubmit();
+
+    resetAudio();
+});
+
+
+// ❌ CANCELAR
+btnCancelar.addEventListener("click", () => {
+    resetAudio();
+});
+
+
+// 🔄 RESET
+function resetAudio() {
+    audioBlob = null;
+    audioChunks = [];
+
+    audioAcoes.style.display = "none";
+
+    // 🔥 limpa preview
+    const player = document.getElementById("playerAudio");
+    player.src = "";
+
+    document.getElementById("audioPreview").style.display = "none";
+}
+
+
+function scrollChatFinal() {
+
+    const chat = document.querySelector('.chat-container');
+
+    if (!chat) return;
+
+    chat.scrollTop = chat.scrollHeight;
+
+}
+
+window.addEventListener('load', () => {
+
+    setTimeout(scrollChatFinal, 100);
+    setTimeout(scrollChatFinal, 500);
+    setTimeout(scrollChatFinal, 1000);
+    setTimeout(scrollChatFinal, 2000);
+
+});
+
+
+</script>
+
+</body>
+</html>

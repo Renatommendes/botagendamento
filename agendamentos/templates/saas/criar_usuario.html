@@ -1,0 +1,22 @@
+<h2>👤 Criar Usuário da Empresa</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <input name="username" placeholder="Usuário">
+    <input name="password" type="password" placeholder="Senha">
+
+    <select name="empresa_id">
+        {% for empresa in empresas %}
+            <option value="{{ empresa.id }}">{{ empresa.nome }}</option>
+        {% endfor %}
+    </select>
+
+    <select name="funcao">
+        <option value="admin">Admin</option>
+        <option value="atendente">Atendente</option>
+        <option value="suporte">Suporte</option>
+    </select>
+
+    <button type="submit">Criar Usuário</button>
+</form>

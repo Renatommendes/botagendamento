@@ -1,0 +1,25 @@
+<h2>Configuração da Empresa</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Verify Token</label>
+    <input type="text" name="verify_token" value="{{ empresa.verify_token }}">
+
+    <label>WhatsApp Access Token</label>
+    <input type="text" name="whatsapp_access_token" value="{{ empresa.whatsapp_access_token }}">
+
+    <label>Phone Number ID</label>
+    <input type="text" name="whatsapp_phone_number_id" value="{{ empresa.whatsapp_phone_number_id }}">
+
+    <label>Google Calendar ID</label>
+    <input type="text" name="google_calendar_id" value="{{ empresa.google_calendar_id }}">
+
+    <label>Horário Início</label>
+    <input type="time" name="horario_inicio" value="{{ empresa.horario_inicio }}">
+
+    <label>Horário Fim</label>
+    <input type="time" name="horario_fim" value="{{ empresa.horario_fim }}">
+
+    <button type="submit">Salvar</button>
+</form>

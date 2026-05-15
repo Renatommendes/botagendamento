@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Bot WhatsApp</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #111827, #1e293b);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .background-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(37, 211, 102, 0.15);
+            filter: blur(120px);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .background-glow.top {
+            top: -150px;
+            left: -100px;
+        }
+
+        .background-glow.bottom {
+            bottom: -150px;
+            right: -100px;
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 430px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 45px 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .logo {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.35);
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        form p {
+            margin-bottom: 20px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        form input {
+            width: 100%;
+            padding: 15px 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.06);
+            color: white;
+            font-size: 15px;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+
+        form input:focus {
+            border-color: #25d366;
+            box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.15);
+            background: rgba(255,255,255,0.09);
+        }
+
+        form input::placeholder {
+            color: #94a3b8;
+        }
+
+        .btn-login {
+            width: 100%;
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.25);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.35);
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .footer strong {
+            color: white;
+        }
+
+        .copyright {
+            margin-top: 8px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 500px) {
+
+            .login-card {
+                padding: 35px 25px;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-glow top"></div>
+    <div class="background-glow bottom"></div>
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <div class="logo">
+                💬
+            </div>
+
+            <h2>Bem-vindo</h2>
+
+            <div class="subtitle">
+                Painel de gerenciamento do Bot WhatsApp
+            </div>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                {{ form.as_p }}
+
+                <button type="submit" class="btn-login">
+                    Entrar no Painel
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="footer">
+            <strong>Bot WhatsApp Inteligente</strong><br>
+            Sistema de automação, atendimento e agendamento automático.
+
+            <div class="copyright">
+                © 2026 - Postme
+51.755.082 RENATO MARQUES MENDES
+CNPJ: 51.755.082/0001-15
+Campinas - SP
+Contato: 19 98104-2273 | renatomendes1989@gmail.com | postmeentregas@gmail.com
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+```

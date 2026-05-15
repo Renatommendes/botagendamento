@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar{% endblock %}
+
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Contato</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ece5dd;
+    }
+
+    header {
+      background-color: #075E54;
+      color: white;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-voltar {
+      margin-right: 15px;
+      text-decoration: none;
+      color: white;
+      font-size: 18px;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 40px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #075E54;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .btn-salvar {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background-color: #25d366;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn-salvar:hover {
+      background-color: #20b558;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="{% url 'contatos_lista' %}" class="btn-voltar">⬅</a>
+    <h3>Editar Contato</h3>
+  </header>
+
+  <div class="container">
+    <h2>Editar</h2>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <label>Nome</label>
+      <input type="text" name="nome" value="{{ contato.nome }}">
+
+      <label>Número</label>
+      <input type="text" name="numero" value="{{ contato.numero }}">
+
+      <button type="submit" class="btn-salvar">Salvar</button>
+    </form>
+  </div>
+
+</body>
+</html>
+{% endblock %}

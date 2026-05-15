@@ -1,0 +1,926 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+
+
+header {
+    background-color: #075E54;
+    color: white;
+    height: 70px;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: visible;
+}
+
+
+body{
+    overflow:auto;
+    background:#f3f4f6;
+}
+
+.flow-area{
+    width:100%;
+    height:900px;
+    overflow:auto;
+    position:relative;
+    background:
+        linear-gradient(to right,#edf0f7 1px,transparent 1px),
+        linear-gradient(to bottom,#edf0f7 1px,transparent 1px);
+    background-size:40px 40px;
+    border-radius:20px;
+    border:1px solid #ddd;
+    cursor:grab;
+
+    /* 🔥 NOVO */
+    user-select:none;
+    scroll-behavior:smooth;
+}
+
+.flow-area:active{
+    cursor:grabbing;
+}
+
+.flow-canvas{
+    width:5000px;
+    height:5000px;
+    position:relative;
+
+    transform-origin:top left;
+
+    transition:transform 0.12s ease;
+
+    will-change: transform;
+
+    overflow:visible;
+    isolation:isolate;
+}
+
+.etapa-box{
+    width:280px;
+    background:#fff;
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.08);
+    border:2px solid #e5e7eb;
+    cursor:move;
+    user-select:none;
+    position:absolute;
+    z-index:20;
+    transition:box-shadow 0.2s;
+}
+
+.etapa-box:hover{
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+
+.etapa-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    font-weight:700;
+    margin-bottom:12px;
+    font-size:18px;
+    color:#111827;
+}
+
+.delete-etapa{
+    width:28px;
+    height:28px;
+    border:none;
+    border-radius:8px;
+    background:#fee2e2;
+    color:#dc2626;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.delete-etapa:hover{
+    background:#fecaca;
+}
+
+.etapa-msg{
+    background:#f3f4f6;
+    padding:12px;
+    border-radius:12px;
+    margin-bottom:15px;
+    color:#374151;
+}
+
+.opcao{
+    background:#eef2ff;
+    padding:10px;
+    border-radius:10px;
+    margin-top:8px;
+    font-size:14px;
+}
+
+.form-topo{
+    background:#fff;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+.form-topo input,
+.form-topo textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    margin-top:8px;
+    margin-bottom:15px;
+}
+
+.form-topo button{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:12px 20px;
+    border-radius:12px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.connector{
+    width:18px;
+    height:18px;
+    background:#2563eb;
+    border-radius:50%;
+    position:absolute;
+    right:-9px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    border:3px solid white;
+}
+
+.connector:hover{
+    transform:translateY(-50%) scale(1.2);
+}
+
+.connector-input{
+    width:18px;
+    height:18px;
+    background:#10b981;
+    border-radius:50%;
+    position:absolute;
+    left:-9px;
+    top:50%;
+    transform:translateY(-50%);
+    border:3px solid white;
+}
+
+svg{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    z-index:0;
+
+    pointer-events:none;
+}
+
+.minimap{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    width:240px;
+    height:170px;
+    background:#fff;
+    border-radius:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.15);
+    z-index:9999;
+    overflow:hidden;
+    border:1px solid #ddd;
+}
+
+.minimap-box{
+    position:absolute;
+    background:#2563eb;
+    border-radius:4px;
+    opacity:0.8;
+}
+
+/* 🔥 CONTROLES AGORA DENTRO DO FLOW */
+
+.zoom-controls{
+    position:fixed;
+    right:20px;
+    bottom:220px;
+    z-index:9999;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.zoom-controls button{
+    width:50px;
+    height:50px;
+    border:none;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 2px 10px rgba(0,0,0,0.12);
+    font-size:22px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.zoom-controls button:hover{
+    background:#f3f4f6;
+}
+
+.zoom-info{
+    position:fixed;
+    right:20px;
+    bottom:180px;
+
+    background:#fff;
+    padding:6px 10px;
+
+    border-radius:10px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,0.12);
+
+    z-index:9999;
+
+    font-size:13px;
+    font-weight:600;
+
+    min-width:auto;
+}
+
+.flow-area.grabbing{
+    cursor:grabbing !important;
+}
+
+.flow-area.grab{
+    cursor:grab !important;
+}
+
+.opcao-item{
+    position:relative;
+    margin-top:10px;
+}
+
+.opcao-input{
+    width:100%;
+    padding:10px;
+    border:1px solid #dbeafe;
+    border-radius:10px;
+    background:#eef2ff;
+}
+
+.opcao-connector{
+    width:16px;
+    height:16px;
+    background:#2563eb;
+    border-radius:50%;
+
+    position:absolute;
+
+    right:-24px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    cursor:pointer;
+
+    border:3px solid white;
+}
+
+.add-opcao{
+    margin-top:14px;
+    padding:10px;
+    border-radius:10px;
+    background:#f3f4f6;
+    text-align:center;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.add-opcao:hover{
+    background:#e5e7eb;
+
+}
+
+.delete-opcao {
+    position: absolute;
+    right: -48px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: #fee2e2;
+    color: #dc2626;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+}
+.delete-opcao:hover {
+    background: #fecaca;
+}
+
+.etapa-box {
+    overflow: visible; /* 🔥 adiciona isso */
+}
+
+
+.etapa-nome-input{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-size:18px;
+    font-weight:700;
+    color:#111827;
+    outline:none;
+}
+
+.etapa-msg-input{
+    width:100%;
+    min-height:90px;
+
+    border:none;
+
+    background:#f3f4f6;
+
+    padding:12px;
+
+    border-radius:12px;
+
+    resize:vertical;
+
+    outline:none;
+
+    color:#374151;
+
+    margin-bottom:15px;
+
+    font-family:inherit;
+    font-size:14px;
+}
+
+.etapa-msg-input:focus,
+.etapa-nome-input:focus{
+    box-shadow:0 0 0 2px #bfdbfe;
+}
+
+
+</style>
+
+<h2>🤖 Flow Builder</h2>
+
+<div class="form-topo">
+
+    <h3>➕ Nova Etapa</h3>
+
+    <form method="POST" action="{% url 'criar_etapa' %}">
+        {% csrf_token %}
+
+        <label>Nome da etapa</label>
+        <input name="nome" required>
+
+        <label>Mensagem do bot</label>
+        <textarea name="mensagem" required></textarea>
+
+        <label>
+            <input type="checkbox" name="inicial">
+            Etapa inicial
+        </label>
+
+        <br><br>
+
+        <button type="submit">
+            Criar Etapa
+        </button>
+
+    </form>
+
+</div>
+<button onclick="salvarFluxo()">💾 Salvar Fluxo</button>
+<div class="flow-area" id="flowArea">
+
+    <!-- 🔥 CONTROLES DENTRO DO FLOW -->
+
+    <div class="zoom-controls">
+        <button type="button" onclick="zoomIn()">+</button>
+        <button type="button" onclick="zoomOut()">−</button>
+    </div>
+
+    <div class="zoom-info">
+        Zoom: <span id="zoomPercent">100%</span>
+    </div>
+
+    <div class="flow-canvas" id="flowCanvas">
+
+    {% for etapa in etapas %}
+    <div class="etapa-box draggable"
+        data-id="{{ etapa.id }}"
+        style="left:{{ etapa.pos_x }}px; top:{{ etapa.pos_y }}px;"
+    >
+        <div class="connector-input"></div>
+        <div class="connector"></div>
+        <div class="etapa-header">
+            <input class="etapa-nome-input"value="{{ etapa.nome }}">
+            {% if etapa.eh_inicial %}🚀{% endif %}
+            <button class="delete-etapa" data-id="{{ etapa.id }}">✕</button>
+        </div>
+        <textarea class="etapa-msg-input">{{ etapa.mensagem }}</textarea>
+        <b>Opções:</b>
+        {% for op in etapa.opcaobot_set.all %}
+        <div class="opcao-item" data-opcao-id="{{ op.id }}">
+            <input class="opcao-input" value="{{ op.texto_opcao }}">
+            <div class="opcao-connector" data-opcao="{{ op.id }}"></div>
+            <button class="delete-opcao" data-opcao-id="{{ op.id }}">✕</button>
+        </div>
+        {% empty %}
+        <p>Sem opções</p>
+        {% endfor %}
+        <div class="add-opcao">+ Adicionar opção</div>
+    </div>
+    {% endfor %}
+
+    <svg id="svgLines"></svg>
+</div>
+
+</div>
+
+<div class="minimap" id="minimap"></div>
+<input
+    type="hidden"
+    name="csrfmiddlewaretoken"
+    value="{{ csrf_token }}"
+>
+<!-- Injeta conexões do banco como JSON -->
+<script>
+// =========================
+// DADOS DO BANCO
+// =========================
+const conexoesSalvas = [
+    {% for c in conexoes %}
+    {
+    de: "{{ c.de_etapa_id }}",
+    para: "{{ c.para_etapa_id }}",
+    opcao_id: "{{ c.opcao_id }}"
+    },
+    {% endfor %}
+];
+
+// =========================
+// VARIÁVEIS GLOBAIS
+// =========================
+const draggables = document.querySelectorAll(".draggable")
+const svg = document.getElementById("svgLines")
+const flowCanvas = document.getElementById("flowCanvas")
+const minimap = document.getElementById("minimap")
+const flowArea = document.getElementById("flowArea")
+const zoomPercent = document.getElementById("zoomPercent")
+const CSRF = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+let selectedConnector = null
+let connections = []
+let scale = 1
+
+// =========================
+// PANNING DO CANVAS
+// =========================
+let isPanning = false, startX, startY, scrollLeft, scrollTop
+
+flowArea.addEventListener("mousedown", e => {
+    if (e.target.closest(".etapa-box") ||
+        e.target.closest(".zoom-controls") ||
+        e.target.closest(".zoom-info")) return
+    isPanning = true
+    flowArea.classList.replace("grab", "grabbing")
+    startX = e.pageX - flowArea.offsetLeft
+    startY = e.pageY - flowArea.offsetTop
+    scrollLeft = flowArea.scrollLeft
+    scrollTop = flowArea.scrollTop
+})
+flowArea.addEventListener("mouseleave", () => { isPanning = false; flowArea.classList.replace("grabbing", "grab") })
+flowArea.addEventListener("mouseup", () => { isPanning = false; flowArea.classList.replace("grabbing", "grab") })
+flowArea.addEventListener("mousemove", e => {
+    if (!isPanning) return
+    e.preventDefault()
+    flowArea.scrollLeft = scrollLeft - (e.pageX - flowArea.offsetLeft - startX)
+    flowArea.scrollTop = scrollTop - (e.pageY - flowArea.offsetTop - startY)
+})
+
+// =========================
+// ZOOM
+// =========================
+function applyZoom() {
+    flowCanvas.style.transform = `scale(${scale})`
+    zoomPercent.innerText = Math.round(scale * 100) + "%"
+}
+function zoomIn() { scale = Math.min(scale + 0.1, 2); applyZoom() }
+function zoomOut() { scale = Math.max(scale - 0.1, 0.3); applyZoom() }
+flowArea.addEventListener("wheel", e => {
+    if (!e.ctrlKey) return
+    e.preventDefault()
+    scale = e.deltaY < 0 ? Math.min(scale + 0.1, 2) : Math.max(scale - 0.1, 0.3)
+    applyZoom()
+}, { passive: false })
+
+// =========================
+// DRAG ETAPAS
+// =========================
+draggables.forEach(el => {
+    let offsetX = 0, offsetY = 0, isDown = false
+
+    el.addEventListener("mousedown", e => {
+        if (e.target.classList.contains("connector") ||
+            e.target.classList.contains("connector-input") ||
+            e.target.classList.contains("opcao-input") ||
+            e.target.classList.contains("opcao-connector") ||
+            e.target.classList.contains("add-opcao")) return
+        isDown = true
+        offsetX = (e.clientX / scale) - el.offsetLeft
+        offsetY = (e.clientY / scale) - el.offsetTop
+        el.style.zIndex = 999
+    })
+
+    document.addEventListener("mouseup", async () => {
+        if (isDown) {
+            await fetch("/bot/salvar-posicao/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+                body: JSON.stringify({
+                    etapa_id: el.dataset.id,
+                    x: parseInt(el.style.left),
+                    y: parseInt(el.style.top)
+                })
+            })
+        }
+        isDown = false
+        el.style.zIndex = 2
+    })
+
+    document.addEventListener("mousemove", e => {
+        if (!isDown) return
+        el.style.left = ((e.clientX / scale) - offsetX) + "px"
+        el.style.top = ((e.clientY / scale) - offsetY) + "px"
+        redrawLines()
+        updateMiniMap()
+    })
+})
+
+// =========================
+// LINHAS CURVAS
+// =========================
+function redrawLines() {
+    svg.innerHTML = ""
+    connections.forEach((conn, index) => {
+        const fromRect = conn.from.getBoundingClientRect()
+        const toRect = conn.to.getBoundingClientRect()
+        const canvasRect = flowCanvas.getBoundingClientRect()
+
+        const x1 = (fromRect.left + fromRect.width / 2 - canvasRect.left) / scale
+        const y1 = (fromRect.top + fromRect.height / 2 - canvasRect.top) / scale
+        const x2 = (toRect.left - canvasRect.left) / scale
+        const y2 = (toRect.top + toRect.height / 2 - canvasRect.top) / scale
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+        path.setAttribute("d", `M ${x1} ${y1} C ${x1 + 120} ${y1}, ${x2 - 120} ${y2}, ${x2} ${y2}`)
+        path.setAttribute("fill", "none")
+        path.setAttribute("stroke", "#2563eb")
+        path.setAttribute("stroke-width", "3")
+        path.setAttribute("opacity", "0.7")
+        path.style.cursor = "pointer"
+        path.style.pointerEvents = "stroke"  // 🔥 clicável só na linha
+
+        // 🔥 duplo clique remove a conexão
+        path.addEventListener("dblclick", async () => {
+            const deId = conn.from.closest(".etapa-box")?.dataset.id
+            const paraId = conn.to?.dataset.id
+
+            if (deId && paraId) {
+                await fetch("/bot/deletar-conexao/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+                    body: JSON.stringify({ de_etapa: deId, para_etapa: paraId })
+                })
+            }
+
+            connections.splice(index, 1)
+            redrawLines()
+        })
+
+        svg.appendChild(path)
+    })
+}
+
+// =========================
+// CONECTAR ETAPAS (CLICK)
+// =========================
+document.addEventListener("click", async e => {
+    const input = e.target.closest(".connector-input")
+    if (!input) return
+    e.stopPropagation()
+    if (!selectedConnector) return
+
+    const origemEl = selectedConnector.closest(".etapa-box")
+    const destinoEl = input.closest(".etapa-box")
+    const deEtapaId = origemEl?.dataset.id
+    const paraEtapaId = destinoEl?.dataset.id
+    if (!deEtapaId || !paraEtapaId) return
+
+    const response = await fetch("/bot/salvar-conexao/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+        body: JSON.stringify({
+    de_etapa: deEtapaId,
+    para_etapa: paraEtapaId,
+    opcao_id: selectedConnector.dataset.opcao
+})
+    })
+    const data = await response.json()
+
+    if (data.success) {
+        connections.push({ from: selectedConnector, to: destinoEl })
+        redrawLines()
+    } else {
+        alert("Erro ao salvar conexão")
+    }
+
+    selectedConnector.style.background = "#2563eb"
+    selectedConnector = null
+})
+
+// =========================
+// CONECTORES — NOVA OPÇÃO
+// =========================
+document.querySelectorAll(".add-opcao").forEach(btn => {
+    btn.addEventListener("mousedown", e => e.stopPropagation())
+    btn.addEventListener("click", async e => {
+        e.stopPropagation()
+        const box = btn.closest(".etapa-box")
+        const etapaId = box.dataset.id
+
+        // 🔥 Salva opção no banco e recebe o ID
+        const resp = await fetch("/bot/criar-opcao-ajax/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+            body: JSON.stringify({ etapa_id: etapaId, texto: "Nova opção" })
+        })
+        const data = await resp.json()
+        if (!data.ok) return
+
+        const novaOpcao = document.createElement("div")
+        novaOpcao.classList.add("opcao-item")
+        novaOpcao.dataset.opcaoId = data.opcao_id
+        novaOpcao.innerHTML = `
+            <input class="opcao-input" value="Nova opção">
+            <div class="opcao-connector" data-opcao="${data.opcao_id}"></div>
+            <button class="delete-opcao" data-opcao-id="${data.opcao_id}">✕</button>
+        `
+        box.insertBefore(novaOpcao, btn)
+
+        // Salva texto ao sair do input
+        novaOpcao.querySelector(".opcao-input").addEventListener("blur", async function() {
+            await fetch("/bot/salvar-texto-opcao/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+                body: JSON.stringify({ opcao_id: data.opcao_id, texto: this.value })
+            })
+        })
+
+        ativarConnectores()
+        ativarDeleteOpcao()
+    })
+})
+
+// Salva texto das opções já existentes no banco
+document.querySelectorAll(".opcao-item").forEach(item => {
+    const opcaoId = item.dataset.opcaoId
+    if (!opcaoId) return
+    item.querySelector(".opcao-input")?.addEventListener("blur", async function() {
+        await fetch("/bot/salvar-texto-opcao/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+            body: JSON.stringify({ opcao_id: opcaoId, texto: this.value })
+        })
+    })
+})
+
+function ativarConnectores() {
+    document.querySelectorAll(".opcao-connector").forEach(conn => {
+        conn.onclick = e => {
+            e.stopPropagation()
+            selectedConnector = conn
+            document.querySelectorAll(".opcao-connector").forEach(c => c.style.background = "#2563eb")
+            conn.style.background = "#ef4444"
+        }
+    })
+}
+ativarConnectores()
+
+// =========================
+// DELETAR ETAPA
+// =========================
+document.querySelectorAll(".delete-etapa").forEach(btn => {
+    btn.addEventListener("click", async e => {
+        e.stopPropagation()
+        if (!confirm("Deseja apagar esta etapa?")) return
+        const etapaId = btn.dataset.id
+        const response = await fetch("/bot/apagar-etapa/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+            body: JSON.stringify({ etapa_id: etapaId })
+        })
+        const data = await response.json()
+        if (data.success) {
+            btn.closest(".etapa-box").remove()
+            updateMiniMap()
+        } else {
+            alert("Erro ao apagar")
+        }
+    })
+})
+
+// =========================
+// SALVAR FLUXO COMPLETO
+// =========================
+function salvarFluxo() {
+    const etapas = []
+    document.querySelectorAll(".etapa-box").forEach(el => {
+        etapas.push({
+            id: el.dataset.id,
+            x: parseInt(el.style.left),
+            y: parseInt(el.style.top)
+        })
+    })
+    const conexoes = connections.map(c => ({
+        de: c.from.closest(".etapa-box").dataset.id,
+        para: c.to.closest(".etapa-box")?.dataset.id
+    })).filter(c => c.de && c.para)
+
+    fetch("/bot/salvar-fluxo/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+        body: JSON.stringify({ etapas, conexoes })
+    })
+}
+
+// =========================
+// MINIMAP
+// =========================
+function updateMiniMap() {
+    minimap.innerHTML = ""
+    draggables.forEach(el => {
+        const mini = document.createElement("div")
+        mini.classList.add("minimap-box")
+        mini.style.left = (parseInt(el.style.left) / 22) + "px"
+        mini.style.top = (parseInt(el.style.top) / 22) + "px"
+        mini.style.width = "16px"
+        mini.style.height = "12px"
+        minimap.appendChild(mini)
+    })
+}
+
+// =========================
+// INIT
+// =========================
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        flowArea.classList.add("grab")
+        applyZoom()
+        updateMiniMap()
+
+        // 🔥 Restaura conexões do banco
+        conexoesSalvas.forEach(c => {
+
+                let from = null
+
+                // 🔥 conexão vindo de opção
+                if (c.opcao_id) {
+
+                    from = document.querySelector(
+                        `.opcao-connector[data-opcao="${c.opcao_id}"]`
+                    )
+
+                }
+
+                // 🔥 conexão normal da etapa
+                else {
+
+                    from = document.querySelector(
+                        `.etapa-box[data-id="${c.de}"] .connector`
+                    )
+
+                }
+
+                const to = document.querySelector(
+                    `.etapa-box[data-id="${c.para}"]`
+                )
+
+                if (from && to) {
+
+                    connections.push({
+                        from,
+                        to
+                    })
+
+                }
+
+            })
+        redrawLines()
+
+        // Scroll até o primeiro bloco
+        const etapas = document.querySelectorAll(".etapa-box")
+        if (etapas.length > 0) {
+            let menorX = Infinity, menorY = Infinity
+            etapas.forEach(el => {
+                const x = parseInt(el.style.left) || 0
+                const y = parseInt(el.style.top) || 0
+                if (x < menorX) menorX = x
+                if (y < menorY) menorY = y
+            })
+            flowArea.scrollLeft = Math.max(menorX - 200, 0)
+            flowArea.scrollTop = Math.max(menorY - 100, 0)
+        }
+
+        // 🔥 Segundo redraw após scroll se posicionar
+        setTimeout(() => redrawLines(), 300)
+
+    }, 300) // aumentou de 150 para 300
+})
+
+
+function ativarDeleteOpcao() {
+    document.querySelectorAll(".delete-opcao:not([data-listener])").forEach(btn => {
+        btn.dataset.listener = "true"  // 🔥 marca para não duplicar
+        btn.addEventListener("click", async e => {
+            e.stopPropagation()
+            if (!confirm("Apagar esta opção?")) return
+            const opcaoId = btn.dataset.opcaoId
+            const response = await fetch("/bot/deletar-opcao/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF },
+                body: JSON.stringify({ opcao_id: opcaoId })
+            })
+            const data = await response.json()
+            if (data.success) {
+                btn.closest(".opcao-item").remove()
+                connections = connections.filter(conn => {
+                    return document.contains(conn.from) && document.contains(conn.to)
+                })
+                redrawLines()
+            } else {
+                alert("Erro ao apagar opção")
+            }
+        })
+    })
+}
+ativarDeleteOpcao()
+
+
+document.querySelectorAll(".etapa-box").forEach(box => {
+
+    const nomeInput = box.querySelector(".etapa-nome-input")
+    const msgInput = box.querySelector(".etapa-msg-input")
+
+    async function salvarEdicao() {
+
+        await fetch("/bot/salvar-etapa/", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json",
+                "X-CSRFToken":CSRF
+            },
+
+            body:JSON.stringify({
+
+                etapa_id: box.dataset.id,
+
+                nome: nomeInput.value,
+
+                mensagem: msgInput.value
+
+            })
+
+        })
+
+    }
+
+    nomeInput?.addEventListener("blur", salvarEdicao)
+
+    msgInput?.addEventListener("blur", salvarEdicao)
+
+})
+
+
+</script>
+
+{% endblock %}

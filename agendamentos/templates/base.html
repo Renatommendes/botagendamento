@@ -1,0 +1,168 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>{% block title %}Sistema{% endblock %}</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #ece5dd;
+    height: 100%;
+}
+
+/* ESTRUTURA */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* HEADER */
+header {
+    background-color: #075E54;
+    color: white;
+    height: 70px;
+
+    padding: 0 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+    overflow: hidden;
+}
+
+/* LOGO */
+.logo {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.logo img {
+    height: 200px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+/* MENU */
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.menu a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+    font-size: 15px;
+}
+
+.menu a:hover {
+    opacity: 0.8;
+}
+
+/* CONTEÚDO */
+.container {
+    flex: 1;
+    padding: 20px;
+}
+
+/* FOOTER */
+footer {
+    background-color: #075E54;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 13px;
+    margin-top: auto;
+    line-height: 1.6;
+}
+
+/* RESPONSIVO */
+@media (max-width: 700px) {
+
+    header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        <img src="{% static 'img/logo.png' %}" alt="Logo">
+    </div>
+
+    <div class="menu">
+        <a href="{% url 'tela_inicial' %}">🏠 Início</a>
+        <a href="{% url 'painel' %}">💬 Conversas</a>
+        <a href="{% url 'contatos_lista' %}">📇 Contatos</a>
+        <a href="{% url 'configuracoes_bot' %}">🤖 Configurações do Bot</a>
+        {% if user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'painel_saas' %}">🧠 Super Admin</a>
+        {% endif %}
+        <a href="{% url 'configurar_empresa' %}">⚙ Configurações</a>
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+
+            <button type="submit">
+                Sair
+            </button>
+        </form>
+    </div>
+
+</header>
+
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer>
+    © 2026 - Postme<br>
+
+    51.755.082 RENATO MARQUES MENDES<br>
+
+    CNPJ: 51.755.082/0001-15<br>
+
+    Campinas - SP<br>
+
+    Contato:
+    19 98104-2273 |
+    renatomendes1989@gmail.com |
+    postmeentregas@gmail.com
+</footer>
+
+</body>
+</html>

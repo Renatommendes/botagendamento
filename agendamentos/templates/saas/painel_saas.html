@@ -1,0 +1,20 @@
+<h1>🔥 SUPER ADMIN PANEL</h1>
+
+<p>Total de empresas: {{ total_empresas }}</p>
+
+<a href="{% url 'criar_empresa' %}">➕ Criar nova empresa</a>
+<a href="{% url 'listar_usuarios' %}">👤 Usuários</a>
+
+
+<hr>
+
+{% for empresa in empresas %}
+    <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+        <h3>{{ empresa.nome }}</h3>
+
+        <p><b>Phone ID:</b> {{ empresa.whatsapp_phone_number_id }}</p>
+        <p><b>Status:</b> Ativa</p>
+
+        <a href="{% url 'editar_empresa' empresa.id %}">Editar</a>
+    </div>
+{% endfor %}
